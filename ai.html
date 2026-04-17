@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Match Game | AI Collaboration</title>
+    <style>
+        :root {
+            --byu-blue: #002e5d;
+            --sushi-red: #ef233c;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--byu-blue);
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 { margin-bottom: 10px; }
+        p { margin-bottom: 20px; font-style: italic; }
+
+        /* Game Board */
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 80px);
+            grid-gap: 10px;
+            perspective: 1000px;
+        }
+
+        .card {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+            cursor: pointer;
+        }
+
+        .card.flipped { transform: rotateY(180deg); }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            border-radius: 8px;
+        }
+
+        .card-front {
+            background-color: var(--sushi-red);
+            color: white;
+        }
+
+        .card-back {
+            background-color: var(--white);
+            color: var(--byu-blue);
+            transform: rotateY(180deg);
+        }
+
+        /* Controls */
+        .controls {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        button {
+            background-color: var(--sushi-red);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        button:hover { background-color: #d90429; }
+
+        /* THE CONNECTION LINK */
+        .resume-link {
+            margin-top: 40px;
+            padding: 15px 25px;
+            border: 2px solid white;
+            border-radius: 50px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .resume-link:hover {
+            background-color: white;
+            color: var(--byu-blue);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Social Matcher</h1>
+    <p>Match the platform icons to win!</p>
+
+    <div class="game-board" id="gameBoard">
+        </div>
+
+    <div class="controls">
+        <button onclick="resetGame()">Restart Game</button>
+    </div>
+
+    <a href="index.html" class="resume-link">Click to return back to resume</a>
+
+    <script>
+        const icons = ['📱', '📸', '🎥', '🎬', '🍣', '✨', '💻', '📈'];
+        let cards = [...icons, ...icons];
+        let flippedCards = [];
+        let matchedCards = [];
+
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function createBoard() {
+            const board = document.getElementById('gameBoard');
+            board.innerHTML = '';
+            shuffle(cards).forEach((icon, index) => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.icon = icon;
+                card.dataset.index = index;
+                card.innerHTML = `
+                    <div class="card-front">?</div>
+                    <div class="card-back">${icon}</div>
+                `;
+                card.addEventListener('click', flipCard);
+                board.appendChild(card);
+            });
+        }
+
+        function flipCard() {
+            if (flippedCards.length < 2 && !this.classList.contains('flipped')) {
+                this.classList.add('flipped');
+                flippedCards.push(this);
+
+                if (flippedCards.length === 2) {
+                    checkMatch();
+                }
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            if (card1.dataset.icon === card2.dataset.icon) {
+                matchedCards.push(card1, card2);
+                flippedCards = [];
+                if (matchedCards.length === cards.length) {
+                    setTimeout(() => alert('You matched them all! Great job!'), 500);
+                }
+            } else {
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    flippedCards = [];
+                }, 1000);
+            }
+        }
+
+        function resetGame() {
+            flippedCards = [];
+            matchedCards = [];
+            createBoard();
+        }
+
+        // Initialize game on load
+        createBoard();
+    </script>
+</body>
+</html>
